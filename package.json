@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "react": "^19.2.6",
-    "react-camera-component": "^1.1.2",
+    "react-camera-component": "^1.1.4",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {

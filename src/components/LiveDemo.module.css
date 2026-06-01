@@ -195,6 +195,26 @@
   border-radius: 4px;
 }
 
+.qualityNote {
+  margin-top: var(--space-2);
+  font-size: 0.72rem;
+  color: var(--accent-orange);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  line-height: 1.5;
+}
+
+.qualityNote code {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--accent-orange);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
 /* Live code */
 .liveCode {
   background: #0a0a14;

@@ -33,7 +33,7 @@ const PROPS = [
     name: 'imageQuality',
     type: 'number',
     default: '1',
-    description: 'Image compression quality from 0 (worst) to 1 (best). Only applies to JPEG and WebP.',
+    description: 'Image compression quality from 0 (worst) to 1 (best). Only applies to image/jpeg and image/webp — has no effect on image/png since PNG is a lossless format.',
     badge: 'image',
   },
   {

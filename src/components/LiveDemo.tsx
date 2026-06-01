@@ -164,7 +164,10 @@ export default function LiveDemo() {
   const handleDownload = (item: CapturedMedia) => {
     const a = document.createElement('a');
     a.href = item.url;
-    a.download = `capture-${item.timestamp}.${item.type === 'image' ? 'png' : 'webm'}`;
+    const ext = item.type === 'image'
+      ? config.imageFormat.split('/')[1]  // png | jpeg | webp
+      : 'webm';
+    a.download = `capture-${item.timestamp}.${ext}`;
     a.click();
   };
 
@@ -441,7 +444,11 @@ export default function LiveDemo() {
                 <div className={styles.groupLabel}>Quality & Resolution</div>
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="cfg-quality">
+                  <label
+                    className="form-label"
+                    htmlFor="cfg-quality"
+                    style={{ opacity: config.imageFormat === 'image/png' ? 0.45 : 1 }}
+                  >
                     imageQuality
                     <span className={styles.configVal}>{config.imageQuality.toFixed(2)}</span>
                   </label>
@@ -453,8 +460,15 @@ export default function LiveDemo() {
                     max="1"
                     step="0.05"
                     value={config.imageQuality}
+                    disabled={config.imageFormat === 'image/png'}
                     onChange={e => updateConfig('imageQuality', parseFloat(e.target.value))}
+                    style={{ opacity: config.imageFormat === 'image/png' ? 0.35 : 1, cursor: config.imageFormat === 'image/png' ? 'not-allowed' : 'pointer' }}
                   />
+                  {config.imageFormat === 'image/png' && (
+                    <div className={styles.qualityNote}>
+                      ⚠️ PNG is lossless — <code>imageQuality</code> has no effect. Switch to <strong>jpeg</strong> or <strong>webp</strong> to control file size.
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group">
