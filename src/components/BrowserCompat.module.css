@@ -1,0 +1,32 @@
+.reqCard {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.reqIcon {
+  font-size: 1.8rem;
+  margin-bottom: var(--space-3);
+}
+
+.reqTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.reqDesc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.browserLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.versionBadge {
+  font-size: 0.68rem !important;
+}

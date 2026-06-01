@@ -1,0 +1,115 @@
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: sticky;
+  top: 80px;
+}
+
+.sidebarBtn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  text-align: left;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.sidebarBtn:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-accent);
+}
+
+.activeBtn {
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-color: var(--border-accent) !important;
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+.sidebarIcon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sidebarText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebarTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sidebarDesc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.activeBtn .sidebarTitle { color: var(--accent-secondary); }
+
+/* Code panel */
+.codePanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.panelIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.panelDesc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+  }
+  .sidebarBtn {
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+    text-align: center;
+  }
+  .sidebarDesc { display: none; }
+}

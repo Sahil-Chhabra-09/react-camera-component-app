@@ -1,0 +1,44 @@
+.tableCard {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.typeCode {
+  font-size: 0.72rem !important;
+  color: var(--accent-cyan) !important;
+  background: rgba(6, 182, 212, 0.08) !important;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.defaultCode {
+  font-size: 0.75rem !important;
+  color: var(--accent-orange) !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+  white-space: nowrap;
+}
+
+.desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.typesSection {
+  margin-top: var(--space-10);
+}
+
+.typesHeading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: var(--space-6);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .typeCode { max-width: 140px; }
+}
