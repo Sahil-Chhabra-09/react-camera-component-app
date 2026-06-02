@@ -101,7 +101,6 @@ export default function LiveDemo() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [cameraKey, setCameraKey] = useState(0);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
   // true when the user has hard-blocked camera access in the browser (state==='denied').
   // In this case no JS can re-prompt — we must show manual unlock instructions.
@@ -186,7 +185,6 @@ export default function LiveDemo() {
     setPermissionDenied(false);
     setIsStreaming(false);
     setIsStartingCamera(config.autoPlayOnStart);
-    setCameraKey((k) => k + 1);
   };
 
   const handleStopStream = () => {
@@ -326,7 +324,6 @@ export default function LiveDemo() {
                 }}
               >
                 <CameraComponent
-                  key={`${cameraKey}-${config.facingMode}-${config.imageFormat}-${config.captureAudio}-${config.frameRate}-${config.width}-${config.height}`}
                   ref={cameraRef}
                   autoPlayOnStart={config.autoPlayOnStart}
                   facingMode={config.facingMode}
@@ -396,8 +393,7 @@ export default function LiveDemo() {
                           address bar
                         </li>
                         <li>
-                          Set <strong>Camera</strong> to{" "}
-                          <strong>Allow</strong>
+                          Set <strong>Camera</strong> to <strong>Allow</strong>
                         </li>
                         <li>Reload the page, then try again</li>
                       </ol>
