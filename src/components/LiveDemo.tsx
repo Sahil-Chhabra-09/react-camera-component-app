@@ -1,17 +1,17 @@
-import { useRef, useState, useCallback } from 'react';
-import { CameraComponent } from 'react-camera-component';
+import { useRef, useState, useCallback } from "react";
+import { CameraComponent } from "react-camera-component";
 import type {
   CameraComponentHandles,
   CapturedMedia,
   StreamInfo,
-} from 'react-camera-component';
-import styles from './LiveDemo.module.css';
+} from "react-camera-component";
+import styles from "./LiveDemo.module.css";
 
 interface DemoConfig {
   autoPlayOnStart: boolean;
-  facingMode: 'user' | 'environment';
+  facingMode: "user" | "environment";
   maxVideoDuration: number;
-  imageFormat: 'image/png' | 'image/jpeg' | 'image/webp';
+  imageFormat: "image/png" | "image/jpeg" | "image/webp";
   imageQuality: number;
   displayStream: boolean;
   captureAudio: boolean;
@@ -22,9 +22,9 @@ interface DemoConfig {
 
 const DEFAULT_CONFIG: DemoConfig = {
   autoPlayOnStart: true,
-  facingMode: 'user',
+  facingMode: "user",
   maxVideoDuration: 60000,
-  imageFormat: 'image/png',
+  imageFormat: "image/png",
   imageQuality: 1,
   displayStream: true,
   captureAudio: false,
@@ -48,30 +48,41 @@ function Toggle({
         type="checkbox"
         id={id}
         checked={checked}
-        onChange={e => onChange(e.target.checked)}
+        onChange={(e) => onChange(e.target.checked)}
       />
       <span className="toggle-slider" />
     </label>
   );
 }
 
-function GalleryItem({ item, onDownload }: { item: CapturedMedia; onDownload: (item: CapturedMedia) => void }) {
+function GalleryItem({
+  item,
+  onDownload,
+}: {
+  item: CapturedMedia;
+  onDownload: (item: CapturedMedia) => void;
+}) {
   return (
     <div className="gallery-item">
       <span className="gallery-item-type">
-        <span className={`badge ${item.type === 'image' ? 'badge-cyan' : 'badge-red'}`}>
-          {item.type === 'image' ? '📸 IMG' : '🎥 VID'}
+        <span
+          className={`badge ${item.type === "image" ? "badge-cyan" : "badge-red"}`}
+        >
+          {item.type === "image" ? "📸 IMG" : "🎥 VID"}
         </span>
       </span>
-      {item.type === 'image' ? (
-        <img src={item.url} alt={`Capture at ${new Date(item.timestamp).toLocaleTimeString()}`} />
+      {item.type === "image" ? (
+        <img
+          src={item.url}
+          alt={`Capture at ${new Date(item.timestamp).toLocaleTimeString()}`}
+        />
       ) : (
         <video src={item.url} controls muted loop />
       )}
       <div className="gallery-item-actions">
         <button
           className="btn btn-sm btn-primary"
-          style={{ fontSize: '0.7rem', padding: '3px 8px' }}
+          style={{ fontSize: "0.7rem", padding: "3px 8px" }}
           onClick={() => onDownload(item)}
         >
           ⬇ Save
@@ -91,40 +102,46 @@ export default function LiveDemo() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [cameraKey, setCameraKey] = useState(0);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const updateConfig = <K extends keyof DemoConfig>(key: K, value: DemoConfig[K]) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+  const updateConfig = <K extends keyof DemoConfig>(
+    key: K,
+    value: DemoConfig[K],
+  ) => {
+    setConfig((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleCapture = useCallback((media: CapturedMedia) => {
-    setCapturedMedia(prev => [media, ...prev].slice(0, 20));
+    setCapturedMedia((prev) => [media, ...prev].slice(0, 20));
     setError(null);
   }, []);
 
   const handleStreamStart = useCallback((info: StreamInfo) => {
     setStreamInfo(info);
     setIsStreaming(true);
+    setIsStartingCamera(false);
     setError(null);
   }, []);
 
   const handleError = useCallback((err: Error) => {
     // Provide a friendlier message for permission denials.
     const isPermissionDenied =
-      err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+      err.name === "NotAllowedError" || err.name === "PermissionDeniedError";
     setError(
       isPermissionDenied
-        ? 'Camera permission was denied. Click Retry — if the browser still blocks access, open your browser\'s site settings and allow camera access, then try again.'
-        : err.message
+        ? "Camera permission was denied. Click Retry — if the browser still blocks access, open your browser's site settings and allow camera access, then try again."
+        : err.message,
     );
     setIsStreaming(false);
     setIsRecording(false);
+    setIsStartingCamera(false);
   }, []);
 
   const handleStartStream = async () => {
     setError(null);
+    setIsStartingCamera(true);
     await cameraRef.current?.startStream();
-    setIsStreaming(true);
   };
 
   // Retry forces a full remount of CameraComponent (via key bump) so the
@@ -132,7 +149,8 @@ export default function LiveDemo() {
   const handleRetry = () => {
     setError(null);
     setIsStreaming(false);
-    setCameraKey(k => k + 1);
+    setIsStartingCamera(config.autoPlayOnStart);
+    setCameraKey((k) => k + 1);
   };
 
   const handleStopStream = () => {
@@ -153,7 +171,7 @@ export default function LiveDemo() {
     setIsRecording(true);
     setRecordingTime(0);
     recordingTimerRef.current = setInterval(() => {
-      setRecordingTime(t => t + 1);
+      setRecordingTime((t) => t + 1);
     }, 1000);
   };
 
@@ -174,26 +192,30 @@ export default function LiveDemo() {
 
   const handleSwitchCamera = () => {
     cameraRef.current?.switchCamera();
-    updateConfig('facingMode', config.facingMode === 'user' ? 'environment' : 'user');
+    updateConfig(
+      "facingMode",
+      config.facingMode === "user" ? "environment" : "user",
+    );
   };
 
   const handleDownload = (item: CapturedMedia) => {
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = item.url;
-    const ext = item.type === 'image'
-      ? config.imageFormat.split('/')[1]  // png | jpeg | webp
-      : 'webm';
+    const ext =
+      item.type === "image"
+        ? config.imageFormat.split("/")[1] // png | jpeg | webp
+        : "webm";
     a.download = `capture-${item.timestamp}.${ext}`;
     a.click();
   };
 
   const handleClearGallery = () => {
-    capturedMedia.forEach(item => URL.revokeObjectURL(item.url));
+    capturedMedia.forEach((item) => URL.revokeObjectURL(item.url));
     setCapturedMedia([]);
   };
 
   const formatTime = (s: number) =>
-    `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   return (
     <section className="section" id="demo">
@@ -206,8 +228,13 @@ export default function LiveDemo() {
             Try it <span className="text-gradient">Live</span>
           </h2>
           <p className="section-subtitle">
-            A fully functional camera powered by{' '}
-            <code style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-secondary)' }}>
+            A fully functional camera powered by{" "}
+            <code
+              style={{
+                fontFamily: "var(--font-mono)",
+                color: "var(--accent-secondary)",
+              }}
+            >
               react-camera-component
             </code>
             . Tweak every prop in real time.
@@ -220,14 +247,33 @@ export default function LiveDemo() {
             <div className={styles.cameraWrap}>
               {/* Status bar */}
               <div className={styles.statusBar}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className={`status-dot ${isStreaming ? (isRecording ? 'recording' : 'active') : 'inactive'}`} />
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                    {isRecording ? `🔴 REC ${formatTime(recordingTime)}` : isStreaming ? '● LIVE' : '○ Stopped'}
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <span
+                    className={`status-dot ${isStreaming ? (isRecording ? "recording" : "active") : "inactive"}`}
+                  />
+                  <span
+                    style={{
+                      fontSize: "0.78rem",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    {isRecording
+                      ? `🔴 REC ${formatTime(recordingTime)}`
+                      : isStreaming
+                        ? "● LIVE"
+                        : "○ Stopped"}
                   </span>
                 </div>
                 {streamInfo && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "var(--text-muted)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
                     {streamInfo.width}×{streamInfo.height}
                   </span>
                 )}
@@ -237,10 +283,10 @@ export default function LiveDemo() {
               <div
                 className={styles.cameraContainer}
                 style={{
-                  background: isStreaming ? '#000' : 'var(--bg-surface)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: isStreaming ? "#000" : "var(--bg-surface)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <CameraComponent
@@ -266,7 +312,13 @@ export default function LiveDemo() {
                   <div className={styles.placeholder}>
                     <div className={styles.placeholderIcon}>📷</div>
                     <p>Camera stream not active</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                    <p
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--text-muted)",
+                        marginTop: "4px",
+                      }}
+                    >
                       Grant permission and click Start Camera
                     </p>
                   </div>
@@ -274,9 +326,18 @@ export default function LiveDemo() {
 
                 {error && (
                   <div className={styles.errorOverlay}>
-                    <span style={{ fontSize: '2rem' }}>⚠️</span>
-                    <p style={{ fontWeight: 600, marginBottom: 4 }}>Camera Error</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{error}</p>
+                    <span style={{ fontSize: "2rem" }}>⚠️</span>
+                    <p style={{ fontWeight: 600, marginBottom: 4 }}>
+                      Camera Error
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {error}
+                    </p>
                     <button
                       className="btn btn-primary btn-sm"
                       style={{ marginTop: 12 }}
@@ -290,13 +351,14 @@ export default function LiveDemo() {
 
               {/* Primary controls */}
               <div className={styles.controls}>
-                {!isStreaming ? (
+                {!isStreaming || error ? (
                   <button
                     className="btn btn-primary"
                     onClick={handleStartStream}
+                    disabled={isStartingCamera}
                     id="demo-start-stream"
                   >
-                    ▶ Start Camera
+                    {isStartingCamera ? "⏳ Starting…" : "▶ Start Camera"}
                   </button>
                 ) : (
                   <button
@@ -311,7 +373,7 @@ export default function LiveDemo() {
                 <button
                   className="btn btn-secondary"
                   onClick={handleCaptureImage}
-                  disabled={!isStreaming}
+                  disabled={!isStreaming || !!error}
                   id="demo-capture-image"
                   title="Capture Image"
                 >
@@ -319,19 +381,21 @@ export default function LiveDemo() {
                 </button>
 
                 <button
-                  className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'}`}
+                  className={`btn ${isRecording ? "btn-danger" : "btn-secondary"}`}
                   onClick={handleToggleRecording}
-                  disabled={!isStreaming}
+                  disabled={!isStreaming || !!error}
                   id="demo-toggle-recording"
-                  title={isRecording ? 'Stop Recording' : 'Start Recording'}
+                  title={isRecording ? "Stop Recording" : "Start Recording"}
                 >
-                  {isRecording ? `⏹ Stop ${formatTime(recordingTime)}` : '🎥 Record'}
+                  {isRecording
+                    ? `⏹ Stop ${formatTime(recordingTime)}`
+                    : "🎥 Record"}
                 </button>
 
                 <button
                   className="btn btn-secondary btn-icon"
                   onClick={handleSwitchCamera}
-                  disabled={!isStreaming}
+                  disabled={!isStreaming || !!error}
                   id="demo-switch-camera"
                   title="Switch Camera"
                 >
@@ -344,7 +408,7 @@ export default function LiveDemo() {
             {capturedMedia.length > 0 && (
               <div className={styles.gallery}>
                 <div className={styles.galleryHeader}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>
                     Gallery ({capturedMedia.length})
                   </span>
                   <button
@@ -357,7 +421,11 @@ export default function LiveDemo() {
                 </div>
                 <div className="gallery-grid">
                   {capturedMedia.map((item, i) => (
-                    <GalleryItem key={`${item.timestamp}-${i}`} item={item} onDownload={handleDownload} />
+                    <GalleryItem
+                      key={`${item.timestamp}-${i}`}
+                      item={item}
+                      onDownload={handleDownload}
+                    />
                   ))}
                 </div>
               </div>
@@ -367,7 +435,9 @@ export default function LiveDemo() {
           {/* Config Panel */}
           <aside className={styles.configPanel}>
             <div className={styles.panelHeader}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>⚙️ Props Config</span>
+              <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>
+                ⚙️ Props Config
+              </span>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setConfig(DEFAULT_CONFIG)}
@@ -385,12 +455,14 @@ export default function LiveDemo() {
                 <div className={styles.configRow}>
                   <div>
                     <div className={styles.configRowLabel}>autoPlayOnStart</div>
-                    <div className={styles.configRowDesc}>Start stream on mount</div>
+                    <div className={styles.configRowDesc}>
+                      Start stream on mount
+                    </div>
                   </div>
                   <Toggle
                     id="cfg-autoplay"
                     checked={config.autoPlayOnStart}
-                    onChange={v => updateConfig('autoPlayOnStart', v)}
+                    onChange={(v) => updateConfig("autoPlayOnStart", v)}
                   />
                 </div>
 
@@ -402,19 +474,21 @@ export default function LiveDemo() {
                   <Toggle
                     id="cfg-display"
                     checked={config.displayStream}
-                    onChange={v => updateConfig('displayStream', v)}
+                    onChange={(v) => updateConfig("displayStream", v)}
                   />
                 </div>
 
                 <div className={styles.configRow}>
                   <div>
                     <div className={styles.configRowLabel}>captureAudio</div>
-                    <div className={styles.configRowDesc}>Record mic with video</div>
+                    <div className={styles.configRowDesc}>
+                      Record mic with video
+                    </div>
                   </div>
                   <Toggle
                     id="cfg-audio"
                     checked={config.captureAudio}
-                    onChange={v => updateConfig('captureAudio', v)}
+                    onChange={(v) => updateConfig("captureAudio", v)}
                   />
                 </div>
               </div>
@@ -424,12 +498,19 @@ export default function LiveDemo() {
                 <div className={styles.groupLabel}>Camera</div>
 
                 <div className="form-group">
-                  <label className="form-label" htmlFor="cfg-facing">facingMode</label>
+                  <label className="form-label" htmlFor="cfg-facing">
+                    facingMode
+                  </label>
                   <select
                     id="cfg-facing"
                     className="form-select"
                     value={config.facingMode}
-                    onChange={e => updateConfig('facingMode', e.target.value as 'user' | 'environment')}
+                    onChange={(e) =>
+                      updateConfig(
+                        "facingMode",
+                        e.target.value as "user" | "environment",
+                      )
+                    }
                   >
                     <option value="user">user (front)</option>
                     <option value="environment">environment (rear)</option>
@@ -444,8 +525,11 @@ export default function LiveDemo() {
                     id="cfg-format"
                     className="form-select"
                     value={config.imageFormat}
-                    onChange={e =>
-                      updateConfig('imageFormat', e.target.value as DemoConfig['imageFormat'])
+                    onChange={(e) =>
+                      updateConfig(
+                        "imageFormat",
+                        e.target.value as DemoConfig["imageFormat"],
+                      )
                     }
                   >
                     <option value="image/png">image/png</option>
@@ -463,10 +547,14 @@ export default function LiveDemo() {
                   <label
                     className="form-label"
                     htmlFor="cfg-quality"
-                    style={{ opacity: config.imageFormat === 'image/png' ? 0.45 : 1 }}
+                    style={{
+                      opacity: config.imageFormat === "image/png" ? 0.45 : 1,
+                    }}
                   >
                     imageQuality
-                    <span className={styles.configVal}>{config.imageQuality.toFixed(2)}</span>
+                    <span className={styles.configVal}>
+                      {config.imageQuality.toFixed(2)}
+                    </span>
                   </label>
                   <input
                     id="cfg-quality"
@@ -476,13 +564,23 @@ export default function LiveDemo() {
                     max="1"
                     step="0.05"
                     value={config.imageQuality}
-                    disabled={config.imageFormat === 'image/png'}
-                    onChange={e => updateConfig('imageQuality', parseFloat(e.target.value))}
-                    style={{ opacity: config.imageFormat === 'image/png' ? 0.35 : 1, cursor: config.imageFormat === 'image/png' ? 'not-allowed' : 'pointer' }}
+                    disabled={config.imageFormat === "image/png"}
+                    onChange={(e) =>
+                      updateConfig("imageQuality", parseFloat(e.target.value))
+                    }
+                    style={{
+                      opacity: config.imageFormat === "image/png" ? 0.35 : 1,
+                      cursor:
+                        config.imageFormat === "image/png"
+                          ? "not-allowed"
+                          : "pointer",
+                    }}
                   />
-                  {config.imageFormat === 'image/png' && (
+                  {config.imageFormat === "image/png" && (
                     <div className={styles.qualityNote}>
-                      ⚠️ PNG is lossless — <code>imageQuality</code> has no effect. Switch to <strong>jpeg</strong> or <strong>webp</strong> to control file size.
+                      ⚠️ PNG is lossless — <code>imageQuality</code> has no
+                      effect. Switch to <strong>jpeg</strong> or{" "}
+                      <strong>webp</strong> to control file size.
                     </div>
                   )}
                 </div>
@@ -490,7 +588,9 @@ export default function LiveDemo() {
                 <div className="form-group">
                   <label className="form-label" htmlFor="cfg-fps">
                     frameRate
-                    <span className={styles.configVal}>{config.frameRate} fps</span>
+                    <span className={styles.configVal}>
+                      {config.frameRate} fps
+                    </span>
                   </label>
                   <input
                     id="cfg-fps"
@@ -500,7 +600,9 @@ export default function LiveDemo() {
                     max="60"
                     step="5"
                     value={config.frameRate}
-                    onChange={e => updateConfig('frameRate', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig("frameRate", parseInt(e.target.value))
+                    }
                   />
                 </div>
 
@@ -517,7 +619,9 @@ export default function LiveDemo() {
                     max="3840"
                     step="160"
                     value={config.width}
-                    onChange={e => updateConfig('width', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig("width", parseInt(e.target.value))
+                    }
                   />
                 </div>
 
@@ -534,14 +638,18 @@ export default function LiveDemo() {
                     max="2160"
                     step="120"
                     value={config.height}
-                    onChange={e => updateConfig('height', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig("height", parseInt(e.target.value))
+                    }
                   />
                 </div>
 
                 <div className="form-group">
                   <label className="form-label" htmlFor="cfg-duration">
                     maxVideoDuration
-                    <span className={styles.configVal}>{config.maxVideoDuration / 1000}s</span>
+                    <span className={styles.configVal}>
+                      {config.maxVideoDuration / 1000}s
+                    </span>
                   </label>
                   <input
                     id="cfg-duration"
@@ -551,7 +659,9 @@ export default function LiveDemo() {
                     max="300000"
                     step="5000"
                     value={config.maxVideoDuration}
-                    onChange={e => updateConfig('maxVideoDuration', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      updateConfig("maxVideoDuration", parseInt(e.target.value))
+                    }
                   />
                 </div>
               </div>
