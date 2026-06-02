@@ -90,6 +90,7 @@ export default function LiveDemo() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [cameraKey, setCameraKey] = useState(0);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const updateConfig = <K extends keyof DemoConfig>(key: K, value: DemoConfig[K]) => {
@@ -108,7 +109,14 @@ export default function LiveDemo() {
   }, []);
 
   const handleError = useCallback((err: Error) => {
-    setError(err.message);
+    // Provide a friendlier message for permission denials.
+    const isPermissionDenied =
+      err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+    setError(
+      isPermissionDenied
+        ? 'Camera permission was denied. Click Retry — if the browser still blocks access, open your browser\'s site settings and allow camera access, then try again.'
+        : err.message
+    );
     setIsStreaming(false);
     setIsRecording(false);
   }, []);
@@ -117,6 +125,14 @@ export default function LiveDemo() {
     setError(null);
     await cameraRef.current?.startStream();
     setIsStreaming(true);
+  };
+
+  // Retry forces a full remount of CameraComponent (via key bump) so the
+  // browser issues a fresh getUserMedia permission prompt.
+  const handleRetry = () => {
+    setError(null);
+    setIsStreaming(false);
+    setCameraKey(k => k + 1);
   };
 
   const handleStopStream = () => {
@@ -228,7 +244,7 @@ export default function LiveDemo() {
                 }}
               >
                 <CameraComponent
-                  key={`${config.facingMode}-${config.imageFormat}-${config.captureAudio}-${config.frameRate}-${config.width}-${config.height}`}
+                  key={`${cameraKey}-${config.facingMode}-${config.imageFormat}-${config.captureAudio}-${config.frameRate}-${config.width}-${config.height}`}
                   ref={cameraRef}
                   autoPlayOnStart={config.autoPlayOnStart}
                   facingMode={config.facingMode}
@@ -264,7 +280,7 @@ export default function LiveDemo() {
                     <button
                       className="btn btn-primary btn-sm"
                       style={{ marginTop: 12 }}
-                      onClick={handleStartStream}
+                      onClick={handleRetry}
                     >
                       Retry
                     </button>
