@@ -103,6 +103,9 @@ export default function LiveDemo() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [cameraKey, setCameraKey] = useState(0);
   const [isStartingCamera, setIsStartingCamera] = useState(false);
+  // true when the user has hard-blocked camera access in the browser (state==='denied').
+  // In this case no JS can re-prompt — we must show manual unlock instructions.
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const updateConfig = <K extends keyof DemoConfig>(
@@ -125,14 +128,45 @@ export default function LiveDemo() {
   }, []);
 
   const handleError = useCallback((err: Error) => {
-    // Provide a friendlier message for permission denials.
-    const isPermissionDenied =
+    const isPermissionError =
       err.name === "NotAllowedError" || err.name === "PermissionDeniedError";
-    setError(
-      isPermissionDenied
-        ? "Camera permission was denied. Click Retry — if the browser still blocks access, open your browser's site settings and allow camera access, then try again."
-        : err.message,
-    );
+
+    if (isPermissionError) {
+      // Use the Permissions API to distinguish:
+      //   'denied'  → user hard-blocked — browser won't re-prompt, must guide to settings
+      //   'prompt'  → user just dismissed the popup — Retry will re-ask
+      //   unsupported (Firefox) → treat as dismissable, let retry attempt
+      const checkPermission = async () => {
+        try {
+          const status = await navigator.permissions.query({
+            name: "camera" as PermissionName,
+          });
+          if (status.state === "denied") {
+            setPermissionDenied(true);
+            setError(
+              "Camera access is blocked. Follow the steps below to allow it.",
+            );
+          } else {
+            // 'prompt' or 'granted' (edge-case) — a retry call will show the dialog
+            setPermissionDenied(false);
+            setError(
+              "Camera permission was dismissed. Click Retry to request access again.",
+            );
+          }
+        } catch {
+          // Permissions API not supported (e.g. Firefox) — show a generic retry message
+          setPermissionDenied(false);
+          setError(
+            "Camera permission was denied. Click Retry, or check your browser's site settings.",
+          );
+        }
+      };
+      checkPermission();
+    } else {
+      setPermissionDenied(false);
+      setError(err.message);
+    }
+
     setIsStreaming(false);
     setIsRecording(false);
     setIsStartingCamera(false);
@@ -144,10 +178,12 @@ export default function LiveDemo() {
     await cameraRef.current?.startStream();
   };
 
-  // Retry forces a full remount of CameraComponent (via key bump) so the
-  // browser issues a fresh getUserMedia permission prompt.
+  // Retry: remounts the CameraComponent (key bump) so the browser issues a fresh
+  // getUserMedia call. This works when permission state is 'prompt' (user dismissed
+  // the popup). It has no effect when state is 'denied' — we show instructions instead.
   const handleRetry = () => {
     setError(null);
+    setPermissionDenied(false);
     setIsStreaming(false);
     setIsStartingCamera(config.autoPlayOnStart);
     setCameraKey((k) => k + 1);
@@ -326,25 +362,55 @@ export default function LiveDemo() {
 
                 {error && (
                   <div className={styles.errorOverlay}>
-                    <span style={{ fontSize: "2rem" }}>⚠️</span>
+                    <span style={{ fontSize: "2rem" }}>
+                      {permissionDenied ? "🔒" : "⚠️"}
+                    </span>
                     <p style={{ fontWeight: 600, marginBottom: 4 }}>
-                      Camera Error
+                      {permissionDenied ? "Camera Blocked" : "Camera Error"}
                     </p>
                     <p
                       style={{
                         fontSize: "0.8rem",
                         color: "var(--text-secondary)",
+                        marginBottom: permissionDenied ? 10 : 0,
                       }}
                     >
                       {error}
                     </p>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      style={{ marginTop: 12 }}
-                      onClick={handleRetry}
-                    >
-                      Retry
-                    </button>
+
+                    {permissionDenied ? (
+                      // Hard-blocked: no JS can re-prompt, guide the user to browser settings
+                      <ol
+                        style={{
+                          fontSize: "0.78rem",
+                          color: "var(--text-secondary)",
+                          textAlign: "left",
+                          paddingLeft: "1.2rem",
+                          lineHeight: 1.7,
+                          margin: "0 0 12px",
+                        }}
+                      >
+                        <li>
+                          Click the <strong>lock 🔒</strong> or{" "}
+                          <strong>camera 📷</strong> icon in your browser's
+                          address bar
+                        </li>
+                        <li>
+                          Set <strong>Camera</strong> to{" "}
+                          <strong>Allow</strong>
+                        </li>
+                        <li>Reload the page, then try again</li>
+                      </ol>
+                    ) : (
+                      // Dismissed (not hard-blocked): Retry will call getUserMedia again
+                      <button
+                        className="btn btn-primary btn-sm"
+                        style={{ marginTop: 12 }}
+                        onClick={handleRetry}
+                      >
+                        Retry
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
